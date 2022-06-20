@@ -5,10 +5,13 @@ rutas = Blueprint("rutas", __name__)
 
 @rutas.before_request
 def verify_token_middleware():
+    """
+    
+    """
     token = request.headers['Authorization'].split(" ")[1]
     return validate_token(token, output=False)
 
-# Ruta pedidos
+ 
 @rutas.route("/mostrarEstado", methods=["GET"])
 def mostrarEstado():
     """
@@ -92,7 +95,7 @@ def historial_pedido(n_pedido):
 @rutas.route('/trasmitirEstado', methods=['POST'])
 def trasmitir_estado():
     """
-    Me trasmite el estado del pedido a la base de datos
+    Permite el registro de informacion en la base de datos por parte de Sharff
     """
     from app import conexion
     try:

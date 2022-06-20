@@ -5,6 +5,9 @@ routes_auth = Blueprint("routes_auth", __name__)
 
 @routes_auth.route("/login", methods=["POST"])
 def login():
+    """
+    Permite que el usuario genere al token para poder acceder a las rutas
+    """
     data = request.get_json()
     if data['username'] == "UsuarioSharff":
         return write_token(data=request.get_json())
@@ -13,8 +16,10 @@ def login():
         response.status_code = 404
         return response
 
- # Verificador de token
 @routes_auth.route("/verifyToken", methods=["GET"])
 def verifyToken():
+    """
+    Permite que el usuario verifique el token para poder acceder a las rutas
+    """
     token = request.headers['Authorization'].split(" ")[1]
     return validate_token(token, output=True)
