@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template
+from flask import Flask, render_template
 from flask_mysqldb import MySQL
 from config import config
 
@@ -13,7 +13,7 @@ app.register_blueprint(rutas, url_prefix="/")
 
 
 # La conexion para poder trabajar con la base de datos
-conexion = MySQL(app)
+conexion = MySQL(app)   
 
 def pagina_no_encontrada(error):
     """
