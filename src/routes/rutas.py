@@ -99,7 +99,7 @@ def trasmitir_estado():
     Permite el registro de informacion en la base de datos por parte de Sharff
     """
     from app import conexion
-
+    # Valido que cumpla con tener 16 caracteres el numero de pedido
     if (validar_nPedido(request.json['numeroPedido'])):
         try:
             cursor = conexion.connection.cursor()
