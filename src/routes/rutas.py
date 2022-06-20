@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from function_jwt import validate_token
-from func_validation import validar_nPedido
+from function_validation import validar_nPedido
 
 rutas = Blueprint("rutas", __name__)
 
