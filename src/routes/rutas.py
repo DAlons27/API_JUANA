@@ -12,8 +12,7 @@ def verify_token_middleware():
     token = request.headers['Authorization'].split(" ")[1]
     return validate_token(token, output=False)
 
- 
-@rutas.route("/mostrarEstado", methods=["GET"])
+@rutas.route("/mostrarEstado", methods=["GET"])                         # listo
 def mostrarEstado():
     """
     Me muestra todos los estados de los pedidos de la base de datos
@@ -23,7 +22,7 @@ def mostrarEstado():
         # Crea una conexion con la base de datos
         cursor = conexion.connection.cursor()
         # Consulta sql
-        sql = "SELECT * FROM products"
+        sql = "SELECT * FROM productos"
         # Ejecuto la consulta
         cursor.execute(sql)
         # Obtengo los datos
@@ -42,18 +41,18 @@ def mostrarEstado():
         # Returning a JSON object with the key `mensaje` and the value `Error`.
         return jsonify({'mensaje': "Error"})
 
-@rutas.route('/mostrarEstado/<n_pedido>', methods=['GET'])
+@rutas.route('/mostrarEstado/<n_pedido>', methods=['GET'])              # Listo
 def mostra_pedido(n_pedido):
     """
     Me muestra el estado del numero de pedido que se le pasa por parametro
     
-    :parametro n_guia: El numero de pedido que es unico
+    :parametro n_pedido: El numero de pedido que es unico
     """
     from app import conexion
     try:
         cursor = conexion.connection.cursor()
         # Consulta sql, el numero de pedido que se le pasa por parametro y se usa el format para que se pueda usar el parametro
-        sql = "SELECT * FROM products WHERE numeroPedido = '{0}'".format(
+        sql = "SELECT * FROM productos WHERE numeroPedido = '{0}' ORDER BY tiempo DESC".format(
             n_pedido)
         cursor.execute(sql)
         # el fetchone es para que solo me devuelva una fila(la que necesito segun el numero de pedido)
@@ -69,23 +68,25 @@ def mostra_pedido(n_pedido):
     except Exception as ex:
         return jsonify({'mensaje': "Error"})
 
-#Mejorar codigo para mostrar mas coindidencias en torno a un numero de pedido
-@rutas.route('/historialPedido/<n_pedido>', methods=['GET'])
+@rutas.route('/historialPedido/<n_pedido>', methods=['GET'])            # Listo
 def historial_pedido(n_pedido):
     """
     Me muestra un historial segun el numero de Pedido que se le pasa por parametro
+    :parametro n_pedido: El numero de pedido que es unico
     """
     from app import conexion
     try:
         cursor = conexion.connection.cursor()
         # Consulta sql, el numero de pedido que se le pasa por parametro y se usa el format para que se pueda usar el parametro
-        sql = "SELECT * FROM products WHERE numeroPedido = '{0}'".format(n_pedido)
+        sql = "SELECT * FROM productos WHERE numeroPedido = '{0}'".format(
+            n_pedido)
         cursor.execute(sql)
         # el fetchone es para que solo me devuelva una fila(la que necesito segun el numero de pedido)
-        datos = cursor.fetchall()        
+        datos = cursor.fetchall()
         if datos != None:
-            pedidos = []
+
             for i in datos:
+                pedidos = []
                 # Creating a dictionary with the data from the database.
                 pedido = {'numeroGuia': i[0], 'numeroPedido': i[1], 'estado': i[2], 'lugar': i[3], 'quienRecibe': i[4],
                           'motivoDescripcion': i[5], 'fecha': i[6], 'hora': i[7], 'link': i[8], 'observacion': i[9]}
@@ -95,9 +96,9 @@ def historial_pedido(n_pedido):
         else:
             return jsonify({'mensaje': "Pedido no encontrado."})
     except Exception as ex:
-        return jsonify({'mensaje': "Error"})
+        return jsonify({'mensaje': "Error, numero de pedido no tiene historial."})
 
-@rutas.route('/trasmitirEstado', methods=['POST'])
+@rutas.route('/trasmitirEstado', methods=['POST'])                      # Listo
 def trasmitir_estado():
     """
     Permite el registro de informacion en la base de datos por parte de Sharff
@@ -108,7 +109,7 @@ def trasmitir_estado():
         try:
             cursor = conexion.connection.cursor()
             # Obtengo los datos del json que se le pasa por parametro y los guardo en una variable
-            sql = "INSERT INTO products (numeroGuia, numeroPedido, estado, lugar, quienRecibe, motivoDescripcion, fecha, hora, link, observacion) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}')".format(
+            sql = "INSERT INTO productos (numeroGuia, numeroPedido, estado, lugar, quienRecibe, motivoDescripcion, fecha, hora, link, observacion) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}')".format(
                 request.json['numeroGuia'], request.json['numeroPedido'], request.json['estado'], request.json['lugar'], request.json['quienRecibe'], request.json['motivoDescripcion'], request.json['fecha'], request.json['hora'], request.json['link'], request.json['observacion'])
             cursor.execute(sql)
             conexion.connection.commit()  # Confirma la accion de insercion
@@ -118,27 +119,7 @@ def trasmitir_estado():
     else:
         return jsonify({'mensaje': "No se pudo registrar."})
 
-@rutas.route('/actualizarEstado/<n_pedido>', methods=['PUT'])
-def actualizar_estado(n_pedido):
-    """
-    Me actualiza el estado del pedido en la base de datos
-    
-    :parametro n_pedido: El numero de pedido que es unico
-    """
-    from app import conexion
-    try:
-        cursor = conexion.connection.cursor()
-        # Obtengo los datos del json que se le pasa por parametro y los guardo en una variable
-        sql = "UPDATE products SET numeroGuia = '{0}', estado = '{1}', lugar = '{3}', quienRecibe = '{4}', motivoDescripcion = '{5}', fecha = '{6}', hora = '{7}', link = '{8}', observacion = '{9}' WHERE numeroPedido = '{2}'".format(
-            request.json['numeroGuia'], request.json['estado'], request.json['lugar'], request.json['quienRecibe'], request.json['motivoDescripcion'], request.json['fecha'], request.json['hora'], request.json['link'], request.json['observacion'], n_pedido)
-        cursor.execute(sql)
-        conexion.connection.commit()  # Confirma la accion de insercion
-        return jsonify({'mensaje': "Estado del Pedido actualizado..."})
-
-    except Exception as ex:
-        return jsonify({'mensaje': "Error"})
-
-@rutas.route('/eliminarEstado/<n_pedido>', methods=['DELETE'])
+@rutas.route('/eliminarEstado/<n_pedido>', methods=['DELETE'])          # Listo
 def eliminar_estado(n_pedido):
     """
     Me elimina el estado del pedido que se le pasa por parametro
@@ -149,7 +130,7 @@ def eliminar_estado(n_pedido):
     try:
         cursor = conexion.connection.cursor()
         # Obtengo los datos del json que se le pasa por parametro y los guardo en una variable
-        sql = "DELETE FROM products WHERE numeroPedido = '{0}'".format(
+        sql = "DELETE FROM productos WHERE numeroPedido = '{0}'".format(
             n_pedido)
         cursor.execute(sql)
         conexion.connection.commit()  # Confirma la accion de insercion
