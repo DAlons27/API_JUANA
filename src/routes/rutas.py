@@ -69,6 +69,7 @@ def mostra_pedido(n_pedido):
     except Exception as ex:
         return jsonify({'mensaje': "Error"})
 
+#Mejorar codigo para mostrar mas coindidencias en torno a un numero de pedido
 @rutas.route('/historialPedido/<n_pedido>', methods=['GET'])
 def historial_pedido(n_pedido):
     """
@@ -78,18 +79,21 @@ def historial_pedido(n_pedido):
     try:
         cursor = conexion.connection.cursor()
         # Consulta sql, el numero de pedido que se le pasa por parametro y se usa el format para que se pueda usar el parametro
-        sql = "SELECT * FROM products WHERE numeroPedido = '{0}'".format(
-            n_pedido)
+        sql = "SELECT * FROM products WHERE numeroPedido = '{0}'".format(n_pedido)
         cursor.execute(sql)
         # el fetchone es para que solo me devuelva una fila(la que necesito segun el numero de pedido)
-        datos = cursor.fetchall()
+        datos = cursor.fetchall()        
         if datos != None:
-            pedido = {'numeroGuia': datos[0], 'numeroPedido': datos[1], 'estado': datos[2], 'lugar': datos[3], 'quienRecibe': datos[4],
-                      'motivoDescripcion': datos[5], 'fecha': datos[6], 'hora': datos[7], 'link': datos[8], 'observacion': datos[9]}
-            return jsonify({'pedidos': pedido, 'mensaje': "Pedido encontrado."})
+            pedidos = []
+            for i in datos:
+                # Creating a dictionary with the data from the database.
+                pedido = {'numeroGuia': i[0], 'numeroPedido': i[1], 'estado': i[2], 'lugar': i[3], 'quienRecibe': i[4],
+                          'motivoDescripcion': i[5], 'fecha': i[6], 'hora': i[7], 'link': i[8], 'observacion': i[9]}
+                # Appending the dictionary `pedido` to the list `pedidos`.
+                pedidos.append(pedido)
+            return jsonify({'pedidos': pedidos, 'mensaje': "Pedido encontrado."})
         else:
             return jsonify({'mensaje': "Pedido no encontrado."})
-
     except Exception as ex:
         return jsonify({'mensaje': "Error"})
 
