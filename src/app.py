@@ -27,6 +27,7 @@ def pagina_no_encontrada(error):
 if __name__ == '__main__':
     # Recurre al archivo configuracion y toma el parametro DEBUG = TRUE
     app.config.from_object(config['development'])
+    # Registro la funcion pagina_no_encontrada como pagina de error
     app.register_error_handler(404, pagina_no_encontrada)
     # Inicia el servidor en el puerto 5000
     app.run(port=5000)
