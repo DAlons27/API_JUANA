@@ -3,14 +3,14 @@ from flask_mysqldb import MySQL
 from config import config
 
 from routes.auth import routes_auth
-from dotenv import load_dotenv
 from routes.rutas import rutas
-
+from routes.ruta_auth import route_sharff
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.register_blueprint(routes_auth, url_prefix="/")
 app.register_blueprint(rutas, url_prefix="/")
-
+app.register_blueprint(route_sharff, url_prefix="/")
 
 # La conexion para poder trabajar con la base de datos
 conexion = MySQL(app)   

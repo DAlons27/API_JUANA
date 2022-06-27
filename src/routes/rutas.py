@@ -4,14 +4,6 @@ from function_validation import validar_nPedido
 
 rutas = Blueprint("rutas", __name__)
 
-@rutas.before_request
-def verify_token_middleware():
-    """
-    Token de autenticacion para poder acceder a las rutas 
-    """
-    token = request.headers['Authorization'].split(" ")[1]
-    return validate_token(token, output=False)
-
 @rutas.route("/mostrarEstado", methods=["GET"])                         # listo
 def mostrarEstado():
     """
@@ -75,49 +67,30 @@ def historial_pedido(n_pedido):
     :parametro n_pedido: El numero de pedido que es unico
     """
     from app import conexion
+   
+    cursor = conexion.connection.cursor()
+    # Consulta sql, el numero de pedido que se le pasa por parametro y se usa el format para que se pueda usar el parametro
+    sql = "SELECT * FROM productos WHERE numeroPedido = '{0}'".format(n_pedido)
+    cursor.execute(sql)
+    # el fetchone es para que solo me devuelva una fila(la que necesito segun el numero de pedido)
+    datos = cursor.fetchall()
+
     try:
-        cursor = conexion.connection.cursor()
-        # Consulta sql, el numero de pedido que se le pasa por parametro y se usa el format para que se pueda usar el parametro
-        sql = "SELECT * FROM productos WHERE numeroPedido = '{0}'".format(
-            n_pedido)
-        cursor.execute(sql)
-        # el fetchone es para que solo me devuelva una fila(la que necesito segun el numero de pedido)
-        datos = cursor.fetchall()
-        if datos != None:
-
-            for i in datos:
-                pedidos = []
-                # Creating a dictionary with the data from the database.
-                pedido = {'numeroGuia': i[0], 'numeroPedido': i[1], 'estado': i[2], 'lugar': i[3], 'quienRecibe': i[4],
-                          'motivoDescripcion': i[5], 'fecha': i[6], 'hora': i[7], 'link': i[8], 'observacion': i[9]}
-                # Appending the dictionary `pedido` to the list `pedidos`.
-                pedidos.append(pedido)
-            return jsonify({'pedidos': pedidos, 'mensaje': "Pedido encontrado."})
+        if len(n_pedido) < 5:
+            return jsonify({'mensaje': "Error: formato de numero de pedido incorrecto"})      
         else:
-            return jsonify({'mensaje': "Pedido no encontrado."})
+            if len(datos) < 1:
+                return jsonify({'mensaje': "Error, numero de pedido no tiene historial."})
+            pedidos = []
+            for i in datos:
+                    # Creating a dictionary with the data from the database.
+                pedido = {'numeroGuia': i[0], 'numeroPedido': i[1], 'estado': i[2], 'lugar': i[3], 'quienRecibe': i[4],
+                            'motivoDescripcion': i[5], 'fecha': i[6], 'hora': i[7], 'link': i[8], 'observacion': i[9]}
+                    # Appending the dictionary `pedido` to the list `pedidos`.
+                pedidos.append(pedido)
+        return jsonify({'pedidos': pedidos, 'mensaje': "Pedido encontrado."})
     except Exception as ex:
-        return jsonify({'mensaje': "Error, numero de pedido no tiene historial."})
-
-@rutas.route('/trasmitirEstado', methods=['POST'])                      # Listo
-def trasmitir_estado():
-    """
-    Permite el registro de informacion en la base de datos por parte de Sharff
-    """
-    from app import conexion
-    # Valido que cumpla con tener 16 caracteres el numero de pedido
-    if (validar_nPedido(request.json['numeroPedido'])):
-        try:
-            cursor = conexion.connection.cursor()
-            # Obtengo los datos del json que se le pasa por parametro y los guardo en una variable
-            sql = "INSERT INTO productos (numeroGuia, numeroPedido, estado, lugar, quienRecibe, motivoDescripcion, fecha, hora, link, observacion) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}')".format(
-                request.json['numeroGuia'], request.json['numeroPedido'], request.json['estado'], request.json['lugar'], request.json['quienRecibe'], request.json['motivoDescripcion'], request.json['fecha'], request.json['hora'], request.json['link'], request.json['observacion'])
-            cursor.execute(sql)
-            conexion.connection.commit()  # Confirma la accion de insercion
-            return jsonify({'mensaje': "Se registró correctamente."})
-        except Exception as ex:
-            return jsonify({'mensaje': "Error"})
-    else:
-        return jsonify({'mensaje': "No se pudo registrar."})
+        return jsonify({'mensaje': "Error"})
 
 @rutas.route('/eliminarEstado/<n_pedido>', methods=['DELETE'])          # Listo
 def eliminar_estado(n_pedido):
@@ -138,3 +111,4 @@ def eliminar_estado(n_pedido):
 
     except Exception as ex:
         return jsonify({'mensaje': "Error"})
+
